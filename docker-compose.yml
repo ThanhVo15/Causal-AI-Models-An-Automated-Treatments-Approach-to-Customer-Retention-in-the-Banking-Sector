@@ -1,0 +1,46 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: causal-ai-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-causal_ai}
+      POSTGRES_USER: ${POSTGRES_USER:-causal_ai}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-causal_ai}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-causal_ai} -d ${POSTGRES_DB:-causal_ai}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: causal-ai-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      APP_NAME: ${APP_NAME:-Causal AI Local Demo}
+      APP_ENV: ${APP_ENV:-local}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      STREAMLIT_PORT: ${STREAMLIT_PORT:-8501}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_DB: ${POSTGRES_DB:-causal_ai}
+      POSTGRES_USER: ${POSTGRES_USER:-causal_ai}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-causal_ai}
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://causal_ai:causal_ai@postgres:5432/causal_ai}
+      STORAGE_ROOT: ${STORAGE_ROOT:-/app/storage}
+    ports:
+      - "${STREAMLIT_PORT:-8501}:8501"
+    volumes:
+      - ./storage:/app/storage
+
+volumes:
+  postgres_data:

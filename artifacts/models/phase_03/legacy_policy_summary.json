@@ -1,0 +1,6 @@
+{
+  "artifact_type": "temporary_wrapper",
+  "note": "This is a cluster-level policy summary derived from the simulated legacy causal table. It is not an exported econml artifact and should not be presented as production-ready causal recommendation logic.",
+  "traceability": "Derived from Save_Model.ipynb cells 4/6/8/10/12/14/16/18 and 5_CAI_P_Post_Generated.ipynb cells 8/10/12/14/16/18/20/22. Cluster feature projection also uses logic from 3_Clustering Model.ipynb cells 8/9/14/17/23. Recommendation policy also depends on 6_CAI_Model.ipynb cells 23/26/28/29/32/39/40/41/42/44/45.",
+  "source_rows": 165034
+}

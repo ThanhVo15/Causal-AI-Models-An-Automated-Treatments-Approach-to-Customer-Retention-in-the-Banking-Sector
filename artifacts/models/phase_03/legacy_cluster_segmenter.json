@@ -1,0 +1,15 @@
+{
+  "artifact_type": "temporary_wrapper",
+  "note": "No original segmentation artifact was found. This wrapper learns nearest centroids from legacy df_cluster.csv labels and is not the original embedding-based clustering artifact.",
+  "traceability": "Derived from Save_Model.ipynb cells 4/6/8/10/12/14/16/18 and 5_CAI_P_Post_Generated.ipynb cells 8/10/12/14/16/18/20/22. Cluster feature projection also uses logic from 3_Clustering Model.ipynb cells 8/9/14/17/23.",
+  "training_rows": 165034,
+  "feature_columns": [
+    "Tenure",
+    "NumOfProducts",
+    "Balance",
+    "IsActiveMember",
+    "CreditScore",
+    "EstimatedSalary",
+    "Age"
+  ]
+}

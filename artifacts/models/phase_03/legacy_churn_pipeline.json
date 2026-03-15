@@ -1,0 +1,18 @@
+{
+  "artifact_type": "temporary_shim",
+  "note": "No original saved churn artifact was found in the repo. This artifact is trained from legacy train.csv using notebook-derived preprocessing and GradientBoostingClassifier.",
+  "traceability": "Derived from Save_Model.ipynb cells 4/6/8/10/12/14/16/18 and 5_CAI_P_Post_Generated.ipynb cells 8/10/12/14/16/18/20/22. Cluster feature projection also uses logic from 3_Clustering Model.ipynb cells 8/9/14/17/23.",
+  "training_rows": 165034,
+  "feature_columns": [
+    "CreditScore",
+    "Geography",
+    "Gender",
+    "Age",
+    "Tenure",
+    "Balance",
+    "NumOfProducts",
+    "HasCrCard",
+    "IsActiveMember",
+    "EstimatedSalary"
+  ]
+}
