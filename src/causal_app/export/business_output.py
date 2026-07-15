@@ -369,14 +369,14 @@ def build_field_definitions_sheet() -> pd.DataFrame:
             "column_name": "priority_band",
             "source_field": "churn_probability, expected_improvement",
             "description": "Priority bucket for action-taking.",
-            "derivation": "P1/P2/P3 deterministic rules documented in phase_05_priority_logic.md.",
+            "derivation": "P1/P2/P3 deterministic rules documented in docs/PROJECT_MASTER_GUIDE_VI.md and docs/user_guide/business_export.md.",
         },
         {
             "sheet_name": "Customer_Action_List",
             "column_name": "reason_short",
             "source_field": "risk_level, recommended_policy, segment_id, expected_improvement, policy_scope",
             "description": "Short rule-based business explanation.",
-            "derivation": "Deterministic template logic documented in phase_05_reason_logic.md.",
+            "derivation": "Deterministic template logic documented in docs/PROJECT_MASTER_GUIDE_VI.md and docs/user_guide/business_export.md.",
         },
         {
             "sheet_name": "Customer_Action_List",

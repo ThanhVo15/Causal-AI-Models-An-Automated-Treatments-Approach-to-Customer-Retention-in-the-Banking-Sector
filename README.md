@@ -1,43 +1,57 @@
-# Causal AI Local Demo Foundation
+# Causal AI Local Demo
 
-This repository is being modernized from a student-era causal AI research bundle into a local Python demo platform.
+Repository này là phiên bản đã được dọn lại của một project nghiên cứu cũ về **customer churn + treatment recommendation trong banking**. Ở trạng thái hiện tại, repo đóng vai trò là một **local demo platform** bằng Python, có thể chạy end-to-end từ upload dữ liệu đến export workbook Excel cho business.
 
-## Current Phase
+## Hệ thống hiện làm được gì?
 
-- Phase 6 status: the local demo has been smoke-tested, business export is in place, and the repo now includes practical tests, run logs, and artifact manifests.
-- Legacy research assets are preserved under:
-  [`legacy_snapshot/Causal-AI-Models-An-Automated-Treatments-Approach-to-Customer-Retention-in-the-Banking-Sector/`](./legacy_snapshot/Causal-AI-Models-An-Automated-Treatments-Approach-to-Customer-Retention-in-the-Banking-Sector/)
-- The extracted engine and demo app are intentionally partial and traceable:
-  - churn scoring is a temporary notebook-derived shim
-  - segmentation is a wrapper built from exported cluster labels
-  - recommendation is derived from the simulated legacy `df_causal_ai` table
-  - Streamlit is wired to local file-based runs, not to a DB-backed app service yet
+- nhận file khách hàng `CSV` hoặc `XLSX`
+- validate contract đầu vào và tách dòng bị reject
+- profiling dữ liệu ở mức nhẹ
+- tính `churn_probability`
+- gán `segment / cluster`
+- đề xuất `recommended_policy`
+- sinh diagnostics và process-tracking output
+- export workbook Excel cho business/sales
 
-## What Exists Now
+UI chính là **Streamlit** trong `apps/streamlit/`.  
+Core engine nằm trong **`src/causal_app/`**.
 
-- Root-level repo structure for runtime code, docs, data, tests, storage, and artifacts
-- Persistent phase memory under [`instructs/`](./instructs/)
-- Migration baseline under [`docs/migration/`](./docs/migration/)
-- Python core engine modules under [`src/causal_app/`](./src/causal_app/)
-- Streamlit demo app under [`apps/streamlit/`](./apps/streamlit/) with pages for upload, profiling, tracking, dashboard, and export
-- Docker + Postgres local foundation via `Dockerfile` and `docker-compose.yml`
-- Minimal Postgres bootstrap SQL under [`db/init/`](./db/init/)
-- Pipeline CLI entrypoint at [`src/causal_app/pipeline/run_pipeline.py`](./src/causal_app/pipeline/run_pipeline.py)
-- Pytest coverage for critical deterministic flows under [`tests/`](./tests/)
+## Điều cần hiểu ngay trước khi dùng
 
-## What Is Not Yet Implemented
+- Recommendation hiện tại **không phải** causal serving production-grade.
+- Runtime đang dùng các **wrapper artifact** local, được dựng từ legacy data:
+  - churn wrapper
+  - segmentation wrapper
+  - policy summary wrapper
+- Lớp recommendation hiện vẫn phụ thuộc vào legacy `df_causal_ai`, nên mang tính **simulation-backed**.
+- Postgres đã có schema nền trong `db/init/`, nhưng app hiện vẫn dùng **file-based run state** trong `storage/`, chưa ghi metadata thật vào DB.
+- `data/`, `notebooks/`, và `configs/` ở top-level hiện chủ yếu là placeholder/scaffold, không phải source-of-truth runtime.
 
-- Database-backed dataset upload persistence flow
-- Full parity verification against notebook outputs
-- Database-backed run persistence
-- Production-ready serving or orchestration
+## Nên đọc gì đầu tiên?
 
-## Quick Start
+- Hướng dẫn tổng thể tiếng Việt:
+  - [`docs/PROJECT_MASTER_GUIDE_VI.md`](./docs/PROJECT_MASTER_GUIDE_VI.md)
+- Memory rút gọn của project:
+  - [`instructs/PROJECT_MEMORY_MASTER.md`](./instructs/PROJECT_MEMORY_MASTER.md)
+- Các điểm còn mở:
+  - [`instructs/OPEN_ITEMS.md`](./instructs/OPEN_ITEMS.md)
+- Tóm tắt lượt dọn tài liệu:
+  - [`docs/DOCUMENTATION_REFRESH_SUMMARY.md`](./docs/DOCUMENTATION_REFRESH_SUMMARY.md)
 
-1. Optional: copy `.env.example` to `.env` and adjust values.
-2. Choose either the local Python path or Docker path.
+## Cấu trúc repo ở mức cao
 
-Local Python path:
+- `src/causal_app/`: source-of-truth cho logic runtime
+- `apps/streamlit/`: giao diện demo local
+- `storage/`: upload, run outputs, workbook export, logs
+- `artifacts/models/phase_03/`: artifact wrappers hiện tại cho demo engine
+- `legacy_snapshot/`: bundle notebook/data cũ được archive nguyên vẹn
+- `docs/`: tài liệu hiện hành
+- `instructs/`: project memory đã được gom gọn
+- `tests/`: test nhỏ nhưng là test thật
+
+## Chạy nhanh
+
+### Cách 1: local Python
 
 ```bash
 python3 -m venv .venv
@@ -46,110 +60,67 @@ python3 -m venv .venv
 .venv/bin/streamlit run apps/streamlit/app.py
 ```
 
-Docker path:
+Mở `http://localhost:8501`.
+
+### Cách 2: Docker
 
 ```bash
 docker compose up --build
 ```
 
-3. Open the Streamlit shell at `http://localhost:8501`.
+Mở `http://localhost:8501`.
 
-## Use The Demo App
-
-The Phase 4 Streamlit app supports a local data-scientist workflow:
-
-- `Upload`: save CSV/XLSX files into `storage/uploads/`, preview them, validate them, and trigger the pipeline
-- `Data Profiling`: inspect schema presence, missing values, duplicates, and lightweight summaries
-- `Process Tracking`: inspect per-stage status, duration, and artifact locations from completed runs
-- `Dashboard`: inspect real diagnostics, churn distribution, cluster distribution, and treatment counts
-- `Export`: download the generated Excel workbook plus CSV outputs
-
-Phase 5 extends the workbook toward a business handoff format:
-
-- `Summary`: run volumes, priority mix, policy mix, reject counts, and limitations
-- `Customer_Action_List`: business-friendly action table with `priority_band`, `priority_score`, and deterministic `reason_short`
-- `Reject_Report`: row-level rejection reasons for data-fix follow-up
-- `Run_Metadata`: run id, source file, and stage timing snapshot
-- `Field_Definitions`: lightweight field dictionary for workbook consumers
-
-There is no curated sample file in `data/samples/` yet. For smoke testing, the app can register the archived legacy `test.csv`.
-
-## Run The Extracted Pipeline
-
-Once dependencies are installed locally, you can run the first extracted pipeline without opening notebooks:
+## Chạy pipeline không cần mở app
 
 ```bash
-pip install -e .
-python -m causal_app.pipeline.run_pipeline \
+.venv/bin/python -m causal_app.pipeline.run_pipeline \
   --input legacy_snapshot/Causal-AI-Models-An-Automated-Treatments-Approach-to-Customer-Retention-in-the-Banking-Sector/Data/test.csv \
   --run-label smoke-test
 ```
 
-Expected outputs:
+## Output nằm ở đâu?
 
-- per-run files under `storage/runs/<run-id>/`
-- Excel export under `storage/exports/<run-id>.xlsx`
+- upload: `storage/uploads/`
+- output theo run: `storage/runs/<run-id>/`
+- workbook Excel: `storage/exports/<run-id>.xlsx`
+- log dùng chung: `storage/logs/pipeline.log`
 
-The Excel workbook is intended to be shareable with business stakeholders, but it still inherits Phase 3 limitations:
+## Workbook Excel hiện tại có gì?
 
-- churn scoring is based on the temporary legacy wrapper
-- segmentation is based on the temporary legacy cluster wrapper
-- recommendation and expected improvement values are still traceable to simulated legacy policy data
-- `reason_short` is deterministic template logic, not LLM-generated commentary
+Workbook business hiện có các sheet:
 
-Important honesty note:
+- `Summary`
+- `Customer_Action_List`
+- `Reject_Report`
+- `Run_Metadata`
+- `Field_Definitions`
 
-- this command was originally added in Phase 3
-- by Phase 6 it has been rerun successfully from a local `.venv` against the archived `test.csv`
-- the current app and engine remain demo-grade, not production-grade
+`Customer_Action_List` là sheet chính cho sales/business.  
+`reason_short` là logic **deterministic/template-based**, không dùng LLM.
 
-## Verification Snapshot
+## Những gì đã được verify thật
 
-Actually verified in the Phase 6 workspace:
+Đã có bằng chứng chạy thật trong workspace:
 
-- `python3 -m py_compile $(find src apps tests -name '*.py' -type f | sort)`
-- `.venv/bin/pytest`
-- `.venv/bin/python -m causal_app.pipeline.run_pipeline --input .../Data/test.csv --run-label phase6-smoke`
-- `.venv/bin/streamlit run apps/streamlit/app.py --server.headless true --server.port 8765`
+- `py_compile`
+- `pytest`
+- pipeline CLI trên file legacy `test.csv`
+- Streamlit boot smoke test
 - `docker compose config`
 
-New traceability outputs now include:
+## Caveat quan trọng
 
-- per-run `run.log`
-- per-run `artifact_manifest.json`
-- shared `storage/logs/pipeline.log`
+- Đừng overclaim phần “causal”.
+- Đừng nhầm artifact hiện tại với artifact nghiên cứu gốc.
+- Đừng coi Postgres là nguồn state chính của app ở thời điểm này.
+- Đừng coi `legacy_snapshot/` là runtime source-of-truth, nhưng cũng chưa được xóa nó vì engine hiện vẫn cần traceability từ đó.
 
-## Local Stack Direction
+## Legacy research bundle
 
-- Streamlit for a lightweight Python-only demo UI
-- Postgres for local persistence
-- Docker Compose for one-command local startup
-- `storage/` for persisted uploads, run logs, profiles, exports, and app-side runtime files
+Bundle notebook cũ vẫn nằm tại:
 
-## Repository Layout
+- [`legacy_snapshot/Causal-AI-Models-An-Automated-Treatments-Approach-to-Customer-Retention-in-the-Banking-Sector/`](./legacy_snapshot/Causal-AI-Models-An-Automated-Treatments-Approach-to-Customer-Retention-in-the-Banking-Sector/)
 
-- `apps/streamlit/`: local demo app wired to storage-backed uploads and Phase 3 run outputs
-- `src/causal_app/`: extracted engine plus future reusable application code
-- `db/init/`: initial Postgres bootstrap SQL
-- `storage/`: persisted local runtime outputs
-- `docs/migration/`: audit baseline and move plan
-- `legacy_snapshot/`: untouched archived research bundle
-- `instructs/`: persistent phase memory for future modernization work
+Nếu muốn hiểu toàn bộ repo từ đầu đến cuối bằng tiếng Việt, hãy bắt đầu từ:
 
-## Legacy Research Bundle
-
-The original notebook-heavy project was intentionally archived without internal rewrites in Phase 2.
-
-- Legacy bundle: [`legacy_snapshot/Causal-AI-Models-An-Automated-Treatments-Approach-to-Customer-Retention-in-the-Banking-Sector/`](./legacy_snapshot/Causal-AI-Models-An-Automated-Treatments-Approach-to-Customer-Retention-in-the-Banking-Sector/)
-- Legacy README: [`legacy_snapshot/Causal-AI-Models-An-Automated-Treatments-Approach-to-Customer-Retention-in-the-Banking-Sector/README.md`](./legacy_snapshot/Causal-AI-Models-An-Automated-Treatments-Approach-to-Customer-Retention-in-the-Banking-Sector/README.md)
-
-## Where To Read Context First
-
-- Phase memory: [`instructs/`](./instructs/)
-- Migration baseline: [`docs/migration/phase_1_audit_baseline.md`](./docs/migration/phase_1_audit_baseline.md)
-- Local startup notes: [`docs/user_guide/local_startup.md`](./docs/user_guide/local_startup.md)
-- Demo workflow: [`docs/user_guide/demo_workflow.md`](./docs/user_guide/demo_workflow.md)
-- Business export guide: [`docs/user_guide/business_export.md`](./docs/user_guide/business_export.md)
-- Artifact versioning: [`docs/architecture/artifact_versioning.md`](./docs/architecture/artifact_versioning.md)
-- Phase 3 runbook: [`instructs/phase_03_runbook.md`](./instructs/phase_03_runbook.md)
-- Phase 4 app notes: [`instructs/phase_04_local_run_guide.md`](./instructs/phase_04_local_run_guide.md)
+- [`docs/PROJECT_MASTER_GUIDE_VI.md`](./docs/PROJECT_MASTER_GUIDE_VI.md)
